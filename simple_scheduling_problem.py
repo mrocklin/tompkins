@@ -1,4 +1,4 @@
-from Tompkins import schedule
+from tompkins import schedule
 from collections import defaultdict
 from pulp import value
 """
@@ -62,16 +62,16 @@ R = defaultdict(lambda:0)
 # Maximum makespan
 M = 100
 
-# Set up the Mixed Integer Linear Program
-prob, X, S, Cmax = schedule(Jobs, Agents, D, C, R, B, P, M)
+if __name__ == '__main__':
+    # Set up the Mixed Integer Linear Program
+    prob, X, S, Cmax = schedule(Jobs, Agents, D, C, R, B, P, M)
 
-prob.solve()
+    prob.solve()
 
-print "Makespan: ", value(Cmax)
-def runs_on(job, X):
-    return [k for k,v in X[job].items() if value(v)==1][0]
+    print "Makespan: ", value(Cmax)
+    def runs_on(job, X):
+        return [k for k,v in X[job].items() if value(v)==1][0]
 
-sched = [(job,(value(time), runs_on(job,X))) for job, time in S.items()]
-sched.sort(key=lambda x:x[1])
-print "Schedule: ", sched
-
+    sched = [(job,(value(time), runs_on(job,X))) for job, time in S.items()]
+    sched.sort(key=lambda x:x[1])
+    print "Schedule: ", sched
