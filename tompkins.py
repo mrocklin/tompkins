@@ -158,3 +158,22 @@ def PtoQ(P):
                     changed = True # We changed Q
                     Q[i,k] = 1 # Now we do.
     return Q
+
+def jobs_when_where(prob, X, S, Cmax):
+    """
+    Take the outputs of schedule and produce a list of the form
+    [(job, start_time, agent),
+     (job, start_time, agent),
+     ... ]
+
+    sorted by start_time.
+
+    >>> sched = jobs_when_where(*make_ilp(env, ... ))
+    """
+    prob.solve()
+
+    def runs_on(job, X):
+        return [k for k,v in X[job].items() if v.value()==1][0]
+
+    sched = [(job, time.value(), runs_on(job,X)) for job, time in S.items()]
+    return list(sorted(sched, key=lambda x:x[1:]))

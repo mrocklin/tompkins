@@ -1,4 +1,4 @@
-from tompkins import schedule
+from tompkins import schedule, jobs_when_where
 from collections import defaultdict
 from pulp import value
 """
@@ -69,9 +69,6 @@ if __name__ == '__main__':
     prob.solve()
 
     print "Makespan: ", value(Cmax)
-    def runs_on(job, X):
-        return [k for k,v in X[job].items() if value(v)==1][0]
+    sched = jobs_when_where(prob, X, S, Cmax)
 
-    sched = [(job,(value(time), runs_on(job,X))) for job, time in S.items()]
-    sched.sort(key=lambda x:x[1])
     print "Schedule: ", sched
