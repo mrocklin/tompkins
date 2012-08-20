@@ -13,7 +13,8 @@ following masters thesis. Section and equation numbers are cited.
 
 by
 
-Mark F. Tompkins, June 2003, Masters thesis for MIT Dept EECS[3]
+Mark F. Tompkins, June 2003, Masters thesis for MIT Dept EECS
 
 [1] sudo easy_install pulp
+
 [2] On ubuntu we used "sudo apt-get install glpk"
