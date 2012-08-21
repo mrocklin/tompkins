@@ -177,3 +177,4 @@ def jobs_when_where(prob, X, S, Cmax):
 
     sched = [(job, time.value(), runs_on(job,X)) for job, time in S.items()]
     return list(sorted(sched, key=lambda x:x[1:]))
+
