@@ -40,3 +40,6 @@ def reverse_dict(d):
 
 def merge(d, e):
     return dict(d.items() + e.items())
+
+def intersection(t1, t2):
+    return tuple(set(t1).intersection(set(t2)))
