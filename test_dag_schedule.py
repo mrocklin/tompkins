@@ -34,11 +34,10 @@ def test_simple_split_problem_integrative():
             communication_cost, R, B, M)
     dags, sched, makespan = schedule(unidag, agents, computation_cost,
                                      communication_cost, R, B, M)
-    assert dags == (
-            {'A': {1: (('send', 'A', 'B', 1, 2), ('send', 'A', 'C', 1, 3))},
-             'B': {2: (), ('recv', 'A', 'B', 1, 2): (2,)},
-             'C': {3: (), ('recv', 'A', 'C', 1, 3): (3,)}})
 
-    assert sched == [(1, 0.0, 'A'), (2, 1.0, 'B'), (3, 1.0, 'C')]
+    from simple_split_problem import solution
+    assert dags == solution['dags']
 
-    assert makespan == 1
+    assert sched == solution['sched']
+
+    assert makespan == solution['makespan']
