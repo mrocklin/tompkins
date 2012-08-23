@@ -47,6 +47,8 @@ def test_unidag_to_subbidag_less_simple():
     # a -> 1 -> b -> 2 -> d
     #        -> c -> 3 -> e
 
+    # 1 -> send(B)
+    #   -> send(C)
     unidagA = {1:(send('A', 'B', 1, 2), send('A', 'C', 1, 3)),
                send('A', 'B', 1, 2): (),
                send('A', 'C', 1, 3): ()}
@@ -58,6 +60,7 @@ def test_unidag_to_subbidag_less_simple():
                             send('A', 'B'): (),
                             send('A', 'C'): ()}
 
+    # recv(A) -> 2
     unidagB = {recv('A', 'B', 1, 2): (2,),
                2: ()}
     sm_usedby, sm_outputsof = unidag_to_subbidag((usedby, outputsof), unidagB)
@@ -65,6 +68,7 @@ def test_unidag_to_subbidag_less_simple():
     assert sm_outputsof == {recv('A', 'B'): ('b',),
                             2: ('d',)}
 
+    # recv(A) -> 3
     unidagC = {recv('A', 'C', 1, 3): (3,),
                3: ()}
     sm_usedby, sm_outputsof = unidag_to_subbidag((usedby, outputsof), unidagC)
