@@ -1,7 +1,7 @@
 # a -> 1 -> b -> 2 -> d
 #        -> c -> 3 -> e
 
-from bidag import bidag_to_unidag
+from bidag import bidag_to_unidag, send, recv
 a,b,c,d,e = 'abcde'
 A,B,C = 'ABC'
 usedby = {a: (1,), b: (2,), c: (3,)}
@@ -35,4 +35,11 @@ solution = {
              'B': {2: (), ('recv', 'A', 'B', 1, 2): (2,)},
              'C': {3: (), ('recv', 'A', 'C', 1, 3): (3,)}},
         'makespan': 1,
-        'sched': [(1, 0.0, 'A'), (2, 1.0, 'B'), (3, 1.0, 'C')]}
+        'sched': [(1, 0.0, 'A'), (2, 1.0, 'B'), (3, 1.0, 'C')],
+        'bidags':
+            {A: ({a: (1,), b: (send(A, B), ), c: (send(A, C),)},
+                   {1: (b, c), send(A, B): (), send(A, C): ()}),
+             B: ({b: (2,), d: ()},
+                 {recv(A, B): (b,), 2: (d,)}),
+             C: ({c: (3,), e: ()},
+                 {recv(A, C): (c,), 3: (e,)})}}
