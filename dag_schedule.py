@@ -5,6 +5,19 @@ from collections import defaultdict
 
 
 def transform_args(dag, agents, compcost, commcost, R, B, M):
+    """ Transform arguments given to dag_schedule to those expected by tompkins
+
+    inputs:
+        dag - unipartite dag of the form {1: (2, 3)} if job 1 precedes 2 and 3
+        agents - a list of machines on which we can run each job
+        compcost - a function (job, agent) -> runtime
+        commcost - a function (job, agent, agent) -> communication time
+        R - a function (job) -> start time (usually lambda j: 0)
+        B - a function (job, agent) -> 1/0 - 1 if job can be run on agent
+        M - a maximum makespan
+    outputs:
+        see tompkins.schedule's inputs
+    """
     P = unidag_to_P(dag)
     D = dictify(compcost)
     C = dictify(commcost)
@@ -14,6 +27,24 @@ def transform_args(dag, agents, compcost, commcost, R, B, M):
     return jobs, agents, D, C, R, B, P, M
 
 def schedule(dag, agents, compcost, commcost, R, B, M):
+    """ Statically Schedule a DAG of jobs on a set of machines
+
+    This function wraps tompkins.schedule
+
+    inputs:
+        dag - unipartite dag of the form {1: (2, 3)} if job 1 precedes 2 and 3
+        agents - a list of machines on which we can run each job
+        compcost - a function (job, agent) -> runtime
+        commcost - a function (job, agent, agent) -> communication time
+        R - a function (job) -> start time (usually lambda j: 0)
+        B - a function (job, agent) -> 1/0 - 1 if job can be run on agent
+        M - a maximum makespan
+
+    outputs:
+        dags - a dict mapping machine to local dag
+        sched - a list of (job, start_time, machine)
+        makespan - the total runtime of the computation
+    """
     args = schedule_tompkins(
                     *transform_args(dag, agents, compcost, commcost, R, B, M))
     prob, X, S, Cmax = args
