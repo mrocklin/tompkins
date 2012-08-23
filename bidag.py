@@ -90,12 +90,11 @@ def communication_conversion(usedby, outputsof, commcost):
                       to               (job, job, machine, machine) -> time
 
     """
-    if not commcost.func_code.co_argcount != 3:
+    if commcost.func_code.co_argcount != 3:
         raise ValueError("Expected function (var, machine, machine) -> time")
 
-    inputsof = reverse_dict(usedby)
-
-    def job_to_job_commcost(j1, j2, m1, m2):
-        variables = set(outputsof[j1]).intersection(set(inputsof[j2]))
+    def job_commcost(j, m1, m2):
+        # variables = set(outputsof[j1]).intersection(set(inputsof[j2]))
+        variables = outputsof[j]
         return sum(commcost(var, m1, m2) for var in variables)
-    return job_to_job_commcost
+    return job_commcost

@@ -20,6 +20,10 @@ def communication_cost(job, agent1, agent2):
     if agent1 == agent2:
         return 0
     return 1
+def bicommunication_cost(var, agent1, agent2):
+    if agent1 == agent2:
+        return 0
+    return 1
 
 def R(job):
     return 0
@@ -37,9 +41,9 @@ solution = {
         'makespan': 1,
         'sched': [(1, 0.0, 'A'), (2, 1.0, 'B'), (3, 1.0, 'C')],
         'bidags':
-            {A: ({a: (1,), b: (send(A, B), ), c: (send(A, C),)},
-                   {1: (b, c), send(A, B): (), send(A, C): ()}),
-             B: ({b: (2,), d: ()},
-                 {recv(A, B): (b,), 2: (d,)}),
-             C: ({c: (3,), e: ()},
-                 {recv(A, C): (c,), 3: (e,)})}}
+            {'A': ({a: (1,), b: (send('A', 'B'), ), c: (send('A', 'C'),)},
+                   {1: (b, c), send('A', 'B'): (), send('A', 'C'): ()}),
+             'B': ({b: (2,), d: ()},
+                 {recv('A', 'B'): (b,), 2: (d,)}),
+             'C': ({c: (3,), e: ()},
+                 {recv('A', 'C'): (c,), 3: (e,)})}}
