@@ -18,7 +18,7 @@ Mark F. Tompkins, June 2003, Masters thesis for MIT Dept EECS[3]
 from pulp import LpVariable, LpProblem, LpMinimize, LpInteger, LpContinuous, lpSum
 from collections import defaultdict
 from util import reverse_dict
-from util import merge
+from util import merge, intersection
 
 def schedule(Jobs, Agents, D, C, R, B, P, M):
     """
@@ -191,7 +191,7 @@ def manydags(dag, jobson):
     inputs:
     dag - Dictionary containing precedence constraints - specifies DAG:
         dag[job1] == (job2, job3) 1 if job1 immediately precedes job2 and job3
-    jobson - Dictionary mapping job to list of machines
+    jobson - Dictionary mapping machine to list of jobs
 
     returns:
     dags - a dict of dags mapping machine to dag {machine: dag}
@@ -211,13 +211,10 @@ def manydags(dag, jobson):
                  for fromjob in jobson[machine]}
                ,
                # Add in all of the receives
-               {recv(onmachine[fromjob], machine, fromjob, tojob): tuple(
-                 job for job in set(dag[fromjob]).intersection(jobson[machine]))
-                 for tojob in jobson[machine]
-                 for fromjob in revdag.get(tojob, ()) # might not have parents
-                 if fromjob not in jobson[machine]
-                 }
+               {recv(onmachine[fromjob], machine, fromjob, tojob):
+                intersection(dag[fromjob], jobson[machine])
+                    for tojob in jobson[machine]
+                    for fromjob in revdag.get(tojob, ()) # might not have parent
+                    if fromjob not in jobson[machine]}
              )
              for machine in jobson.keys()}
-
-
