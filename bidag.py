@@ -36,33 +36,44 @@ def bidag_to_unidag(usedby, outputsof):
 
 
 def unidag_to_subbidag((usedby, outputsof), unidag):
-    """ Converts a bivariate DAG of jobs+variables to a dag of jobs
+    """ Converts a full bivariate DAG and a small unidag part to a small bidag
 
     inputs:
-        usedby      - dict mapping variables to jobs that use them
-        outputsof   - dict mapping jobs to variables that they produce
+        usedby      - dict mapping variables to jobs that use them - full graph
+        outputsof   - dict mapping jobs to variables they produce  - full graph
+        unidag      - a subset of the full unipartite dag
+
+    outputs:
+        small_usedby    - dict for the bivariate subdag
+        small_outputsof - dict for the bivariate subdag
 
     >>> # 'a' -> 1 -> 'b' -> 2 -> c
-    >>> unidag_to_bidag({1: (2,)}, {'a': (1, ), 'b':(2, )},)
-    {1: (2, ), 2: tuple()}
+    >>> usedby      = {'a': (1,), 'b': (2,)}
+    >>> outputsof   = {1: ('b',) , 2: ('c', )})
+    >>> subdag      = {1: (send('A', 'B', 1, 2), )}
+    >>> unidag_to_subbidag(usedby, outputsof, subdag)
+    ({'a': (1,), 'b': (send('A', 'B'),)},
+     {1: ('b',)})
     """
     inputsof = reverse_dict(usedby)
     jobs = unidag.keys()
     sends = filter(issend, jobs)
     recvs = filter(isrecv, jobs)
+    # The subset of usedby that is relevant for the sub unidag
     small_usedby = {var: intersection(usedby[var], jobs)
         for job in jobs
         for var in inputsof.get(job, ())}
+    # The subset of outputsof that is relevant for the sub unidag
     small_outputsof = {job: outputsof[job] for job in intersection(outputsof, jobs)}
-    print "inside unidag_to_subdiag"
-    print small_usedby
-    print small_outputsof
 
+    # For each send hook up all of the new usedby
+    # Add empty entries in outputsof for sends
     for (_, from_machine, to_machine, from_job, to_job) in sends:
         for var in intersection(outputsof[from_job], inputsof[to_job]):
             small_usedby[var] = small_usedby.get(var, ()) + (send(from_machine, to_machine),)
         small_outputsof[send(from_machine, to_machine)] = ()
 
+    # For each receive hookup all of the new outputsof
     for (_, from_machine, to_machine, from_job, to_job) in recvs:
         small_outputsof[recv(from_machine, to_machine)] = (
                 intersection(outputsof[from_job], inputsof[to_job]))

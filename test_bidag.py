@@ -38,8 +38,6 @@ def test_unidag_to_subbidag():
     subdag2 = {recv('A', 'B', 2, 3): (3,), 3: ()}
     sm_usedby, sm_outputsof = unidag_to_subbidag((usedby, outputsof), subdag2)
 
-    print sm_usedby
-    print sm_outputsof
     assert sm_usedby    == {'c': (3,)}
     assert sm_outputsof == {recv('A', 'B'): ('c',), 3: ('d',)}
 
