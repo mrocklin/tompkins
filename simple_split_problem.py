@@ -8,12 +8,13 @@ usedby = {a: (1,), b: (2,), c: (3,)}
 outputsof = {1: (b, c), 2: (d,), 3: (e, )}
 
 unidag = bidag_to_unidag(usedby, outputsof)
+agents = (A, B, C)
 
 def computation_cost(job, agent):
     if (job, agent) in [(1,'A'), (2, 'B'), (3, 'C')]:
         return 0
     else:
-        return 2
+        return 3
 
 def communication_cost(job, agent1, agent2):
     if agent1 == agent2:
@@ -25,3 +26,5 @@ def R(job):
 
 def B(job, agent):
     return 1
+
+M = 10
