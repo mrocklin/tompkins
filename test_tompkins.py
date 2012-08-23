@@ -32,7 +32,8 @@ def test_jobs_where():
     pass
 
 def test_unidag_to_P():
-    assert unidag_to_P({1: (2, 3)}) == {(1,2): 1, (1,3): 1}
+    d = unidag_to_P({1: (2, 3)})
+    assert d[1,2] == 1 and d[1,3] == 1 and d[2,3] == 0
     assert unidag_to_P({1: (2, 3), 3: (4,)}) == {(1,2): 1, (1,3): 1, (3,4): 1}
 
 def test_manydags_simple():

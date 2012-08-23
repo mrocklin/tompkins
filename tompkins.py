@@ -17,8 +17,17 @@ Mark F. Tompkins, June 2003, Masters thesis for MIT Dept EECS[3]
 
 from pulp import LpVariable, LpProblem, LpMinimize, LpInteger, LpContinuous, lpSum
 from collections import defaultdict
-from util import reverse_dict
+from util import reverse_dict, dictify
 from util import merge, intersection
+
+def schedule_convenient(dag, agents, compcost, commcost, R, B, M):
+    P = unidag_to_P(dag)
+    D = dictify(compcost)
+    C = dictify(commcost)
+    R = dictify(R)
+    B = dictify(B)
+    jobs = dag.keys()
+    return schedule(jobs, agents, D, C, R, B, P, M)
 
 def schedule(Jobs, Agents, D, C, R, B, P, M):
     """
@@ -167,7 +176,10 @@ def unidag_to_P(dag):
     input   like {1: (2, 3)}
     output  like {(1,2): 1, (1, 3): 1}
     """
-    return {(a,b): 1 for a in dag for b in dag[a]}
+    d = defaultdict(lambda : 0)
+    for k, v in {(a,b): 1 for a in dag for b in dag[a]}.items():
+        d[k] = v
+    return d
 
 def jobs_where(sched):
     """
