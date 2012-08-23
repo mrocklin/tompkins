@@ -1,4 +1,4 @@
-from tompkins import schedule, PtoQ, jobs_when_where
+from tompkins import schedule, PtoQ, jobs_when_where, manydags, send, recv
 from collections import defaultdict
 
 def test_schedule():
@@ -26,3 +26,24 @@ def test_jobs_when_where():
     assert job == 'start'
     assert time == 0
     assert machine in Agents
+
+def test_manydags_simple():
+    # 1 -> 2 -> 3
+    dag = {1: (2,), 2: (3, ), 3:()}
+    jobson = {'A': (1, 2), 'B': (3, )}
+
+    dags = manydags(dag, jobson)
+    assert dags['A'] == {1: (2, ), 2: (send('A', 'B', 2, 3), )}
+    assert dags['B'] == {recv('A', 'B', 2, 3): (3, ), 3:()}
+
+def test_manydags_less_simple():
+    # 1 -> 2
+    #   -> 3
+
+    dag = {1: (2, 3), 2: (), 3:()}
+    jobson = {'A': (1,), 'B': (2, ), 'C':(3,)}
+
+    dags = manydags(dag, jobson)
+    assert dags['A'] == {1: (send('A', 'B', 1, 2), send('A', 'C', 1, 3))}
+    assert dags['B'] == {recv('A', 'B', 1, 2): (2, ), 2: ()}
+    assert dags['C'] == {recv('A', 'C', 1, 3): (3, ), 3: ()}

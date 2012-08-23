@@ -17,6 +17,8 @@ Mark F. Tompkins, June 2003, Masters thesis for MIT Dept EECS[3]
 
 from pulp import LpVariable, LpProblem, LpMinimize, LpInteger, LpContinuous, lpSum
 from collections import defaultdict
+from util import reverse_dict
+from util import merge
 
 def schedule(Jobs, Agents, D, C, R, B, P, M):
     """
@@ -177,4 +179,45 @@ def jobs_when_where(prob, X, S, Cmax):
 
     sched = [(job, time.value(), runs_on(job,X)) for job, time in S.items()]
     return list(sorted(sched, key=lambda x:x[1:]))
+
+def send(from_machine, to_machine, from_job, to_job):
+    return ("send", from_machine, to_machine, from_job, to_job)
+def recv(from_machine, to_machine, from_job, to_job):
+    return ("recv", from_machine, to_machine, from_job, to_job)
+
+def manydags(dag, jobson):
+    """ Given a dag and a schedule return many dags with sends/receives
+
+    inputs:
+    dag - Dictionary containing precedence constraints - specifies DAG:
+        dag[job1] == (job2, job3) 1 if job1 immediately precedes job2 and job3
+    jobson - Dictionary mapping job to list of machines
+
+    returns:
+    dags - a dict of dags mapping machine to dag {machine: dag}
+        Each dag is represented like dag (see above)
+        New send and receive jobs have been added
+    """
+    onmachine = {value:key  for key, values in jobson.items()
+                            for value in values}
+    revdag = reverse_dict(dag)
+    return {machine:
+             merge(
+               # Standard local dag
+               {fromjob: tuple(
+                 tojob if tojob in jobson[machine]
+                       else send(machine, onmachine[tojob], fromjob, tojob)
+                       for tojob in dag[fromjob])
+                 for fromjob in jobson[machine]}
+               ,
+               # Add in all of the receives
+               {recv(onmachine[fromjob], machine, fromjob, tojob): tuple(
+                 job for job in set(dag[fromjob]).intersection(jobson[machine]))
+                 for tojob in jobson[machine]
+                 for fromjob in revdag.get(tojob, ()) # might not have parents
+                 if fromjob not in jobson[machine]
+                 }
+             )
+             for machine in jobson.keys()}
+
 
