@@ -161,6 +161,24 @@ def PtoQ(P):
                     Q[i,k] = 1 # Now we do.
     return Q
 
+def unidag_to_P(dag):
+    """ Converts a dag dict into one suitable for the tompkins algorithm
+
+    input   like {1: (2, 3)}
+    output  like {(1,2): 1, (1, 3): 1}
+    """
+    return {(a,b): 1 for a in dag for b in dag[a]}
+
+def jobs_where(sched):
+    """
+    Given the output of jobs_when_where produce a dict mapping machine to jobs
+    {machine: [jobs]}
+    """
+    result = {}
+    for job, _, in agent:
+        result[agent] = result.get(agent, ()) + (job,)
+    return result
+
 def jobs_when_where(prob, X, S, Cmax):
     """
     Take the outputs of schedule and produce a list of the form

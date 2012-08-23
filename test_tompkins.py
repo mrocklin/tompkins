@@ -1,4 +1,5 @@
-from tompkins import schedule, PtoQ, jobs_when_where, manydags, send, recv
+from tompkins import (schedule, PtoQ, jobs_when_where, manydags, send, recv,
+        unidag_to_P)
 from collections import defaultdict
 
 def test_schedule():
@@ -26,6 +27,13 @@ def test_jobs_when_where():
     assert job == 'start'
     assert time == 0
     assert machine in Agents
+
+def test_jobs_where():
+    pass
+
+def test_unidag_to_P():
+    assert unidag_to_P({1: (2, 3)}) == {(1,2): 1, (1,3): 1}
+    assert unidag_to_P({1: (2, 3), 3: (4,)}) == {(1,2): 1, (1,3): 1, (3,4): 1}
 
 def test_manydags_simple():
     # 1 -> 2 -> 3
