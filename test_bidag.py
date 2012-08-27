@@ -67,8 +67,6 @@ def test_unidag_to_subbidag_less_simple():
     assert sm_usedby    == {'b': (2,), 'd': ()}
     assert sm_outputsof == {recv('A', 'B'): ('b',),
                             2: ('d',)}
-    print sm_usedby
-    print sm_outputsof
 
     # recv(A) -> 3
     unidagC = {recv('A', 'C', 1, 3): (3,),
