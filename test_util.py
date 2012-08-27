@@ -19,6 +19,12 @@ def test_merge():
     e = {4:5}
     assert merge(d, e) == {1:2, 3:4, 4:5}
 
+def test_merge_many():
+    d = {1:2, 3:4}
+    e = {4:5}
+    f = {6:7}
+    assert merge(d, e, f) == {1:2, 3:4, 4:5, 6:7}
+
 def test_intersection():
     assert set(intersection((1,2,3), (2,3))) == set((2,3))
     assert set(intersection((1,2,3), {2:'a' ,3:'b'})) == set((2,3))

@@ -38,8 +38,8 @@ def reverse_dict(d):
             result[val] = result.get(val, tuple()) + (key, )
     return result
 
-def merge(d, e):
-    return dict(d.items() + e.items())
+def merge(*args):
+    return dict(sum([arg.items() for arg in args], []))
 
 def intersection(t1, t2):
     return tuple(set(t1).intersection(set(t2)))
