@@ -4,7 +4,7 @@
 from bidag import bidag_to_unidag, send, recv
 a,b,c,d,e = 'abcde'
 A,B,C = 'ABC'
-usedby = {a: (1,), b: (2,), c: (3,)}
+usedby = {a: (1,), b: (2,), c: (3,), d:(), e:()}
 outputsof = {1: (b, c), 2: (d,), 3: (e, )}
 
 unidag = bidag_to_unidag(usedby, outputsof)
@@ -35,7 +35,9 @@ M = 10
 
 solution = {
         'dags':
-            {'A': {1: (('send', 'A', 'B', 1, 2), ('send', 'A', 'C', 1, 3))},
+            {'A': {1: (send('A', 'B', 1, 2), send('A', 'C', 1, 3)),
+                   send('A', 'B', 1, 2): (),
+                   send('A', 'C', 1, 3): ()},
              'B': {2: (), ('recv', 'A', 'B', 1, 2): (2,)},
              'C': {3: (), ('recv', 'A', 'C', 1, 3): (3,)}},
         'makespan': 1,

@@ -14,7 +14,9 @@ def test_manydags_simple():
     jobson = {'A': (1, 2), 'B': (3, )}
 
     dags = manydags(dag, jobson)
-    assert dags['A'] == {1: (2, ), 2: (send('A', 'B', 2, 3), )}
+    assert dags['A'] == {1: (2, ),
+                         2: (send('A', 'B', 2, 3), ),
+                         send('A', 'B', 2, 3): ()}
     assert dags['B'] == {recv('A', 'B', 2, 3): (3, ), 3:()}
 
 def test_manydags_less_simple():
@@ -25,7 +27,9 @@ def test_manydags_less_simple():
     jobson = {'A': (1,), 'B': (2, ), 'C':(3,)}
 
     dags = manydags(dag, jobson)
-    assert dags['A'] == {1: (send('A', 'B', 1, 2), send('A', 'C', 1, 3))}
+    assert dags['A'] == {1: (send('A', 'B', 1, 2), send('A', 'C', 1, 3)),
+                         send('A', 'B', 1, 2): (),
+                         send('A', 'C', 1, 3): ()}
     assert dags['B'] == {recv('A', 'B', 1, 2): (2, ), 2: ()}
     assert dags['C'] == {recv('A', 'C', 1, 3): (3, ), 3: ()}
 

@@ -110,5 +110,12 @@ def manydags(dag, jobson):
                     for tojob in jobson[machine]
                     for fromjob in revdag.get(tojob, ()) # might not have parent
                     if fromjob not in jobson[machine]}
+               ,
+               # Add in all of the sends
+               {send(machine, onmachine[tojob], fromjob, tojob): ()
+                   for fromjob in jobson[machine]
+                   for tojob in dag.get(fromjob, ())
+                   if onmachine[tojob] != machine
+                   }
              )
              for machine in jobson.keys()}

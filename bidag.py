@@ -48,12 +48,13 @@ def unidag_to_subbidag((usedby, outputsof), unidag):
         small_outputsof - dict for the bivariate subdag
 
     >>> # 'a' -> 1 -> 'b' -> 2 -> c
-    >>> usedby      = {'a': (1,), 'b': (2,)}
-    >>> outputsof   = {1: ('b',) , 2: ('c', )})
-    >>> subdag      = {1: (send('A', 'B', 1, 2), )}
-    >>> unidag_to_subbidag(usedby, outputsof, subdag)
+    >>> usedby      = {'a': (1,), 'b': (2,), 'c': ()}
+    >>> outputsof   = {1: ('b',) , 2: ('c', )}
+    >>> subdag      = {1: (send('A', 'B', 1, 2), ),
+                       send('A', 'B', 1, 2): ()}
+    >>> unidag_to_subbidag((usedby, outputsof), subdag)
     ({'a': (1,), 'b': (send('A', 'B'),)},
-     {1: ('b',)})
+     {1: ('b',), send('A', 'B'): ()})
     """
     inputsof = reverse_dict(usedby)
     jobs = unidag.keys()
@@ -61,10 +62,13 @@ def unidag_to_subbidag((usedby, outputsof), unidag):
     recvs = filter(isrecv, jobs)
     # The subset of usedby that is relevant for the sub unidag
     small_usedby = {var: intersection(usedby[var], jobs)
-        for job in jobs
-        for var in inputsof.get(job, ())}
+                    for job in jobs
+                    for var in
+                        inputsof.get(job, ()) + outputsof.get(job, ())}
+
     # The subset of outputsof that is relevant for the sub unidag
-    small_outputsof = {job: outputsof[job] for job in intersection(outputsof, jobs)}
+    small_outputsof = {job: outputsof[job]
+                       for job in intersection(outputsof, jobs)}
 
     # For each send hook up all of the new usedby
     # Add empty entries in outputsof for sends

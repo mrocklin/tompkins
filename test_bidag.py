@@ -25,7 +25,7 @@ def test_bidag_to_unidag_less_simple():
     assert unidag == {1: (2, 3), 2: (), 3: ()}
 
 def test_unidag_to_subbidag_simple():
-    usedby = {'a': (1,), 'b': (2,), 'c':(3, )}
+    usedby = {'a': (1,), 'b': (2,), 'c':(3, ), 'd':()}
     outputsof = {1: ('b',) , 2: ('c', ), 3: ('d',)}
     # a -> 1 -> b -> 2 -> c -> 3 -> d
 
@@ -38,11 +38,11 @@ def test_unidag_to_subbidag_simple():
     subdag2 = {recv('A', 'B', 2, 3): (3,), 3: ()}
     sm_usedby, sm_outputsof = unidag_to_subbidag((usedby, outputsof), subdag2)
 
-    assert sm_usedby    == {'c': (3,)}
+    assert sm_usedby    == {'c': (3,), 'd': ()}
     assert sm_outputsof == {recv('A', 'B'): ('c',), 3: ('d',)}
 
 def test_unidag_to_subbidag_less_simple():
-    usedby = {'a': (1,), 'b': (2,), 'c':(3, )}
+    usedby = {'a': (1,), 'b': (2,), 'c':(3, ), 'd': (), 'e': ()}
     outputsof = {1: ('b', 'c') , 2: ('d', ), 3: ('e',)}
     # a -> 1 -> b -> 2 -> d
     #        -> c -> 3 -> e
@@ -64,20 +64,22 @@ def test_unidag_to_subbidag_less_simple():
     unidagB = {recv('A', 'B', 1, 2): (2,),
                2: ()}
     sm_usedby, sm_outputsof = unidag_to_subbidag((usedby, outputsof), unidagB)
-    assert sm_usedby    == {'b': (2,)}
+    assert sm_usedby    == {'b': (2,), 'd': ()}
     assert sm_outputsof == {recv('A', 'B'): ('b',),
                             2: ('d',)}
+    print sm_usedby
+    print sm_outputsof
 
     # recv(A) -> 3
     unidagC = {recv('A', 'C', 1, 3): (3,),
                3: ()}
     sm_usedby, sm_outputsof = unidag_to_subbidag((usedby, outputsof), unidagC)
-    assert sm_usedby    == {'c': (3,)}
+    assert sm_usedby    == {'c': (3,), 'e': ()}
     assert sm_outputsof == {recv('A', 'C'): ('c',),
                             3: ('e',)}
 
 def test_cycle():
-    usedby = {'a': (1,), 'b': (2,), 'c':(3, )}
+    usedby = {'a': (1,), 'b': (2,), 'c':(3, ), 'd': (), 'e': ()}
     outputsof = {1: ('b', 'c') , 2: ('d', ), 3: ('e',)}
 
     unidag = bidag_to_unidag(usedby, outputsof)
