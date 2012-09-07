@@ -13,13 +13,24 @@ def memodict(f):
 def unique(x):
     return len(set(x)) == len(x)
 
+def hist(coll):
+    counts = {}
+    for elem in coll:
+        counts[elem] = counts.get(elem, 0) + 1
+    return counts
+
 def fgraph_with_names(fgraph):
     """ Gives unique names to all variable within a FunctionGraph """
     ins, outs  = theano.gof.graph.clone(fgraph.inputs, fgraph.outputs)
+
+    names = map(lambda var: var.name, fgraph.variables)
+    h = hist(names)
+    bad_var = lambda var: h[var.name] > 1
+
     fgraph = theano.FunctionGraph(ins, outs)
 
-    for i, var in enumerate(fgraph.variables):
-        var.name = var.name or "_%d"%i
+    for i, var in enumerate(filter(bad_var, fgraph.variables)):
+        var.name = (var.name or "") + "_%d"%i
 
     if not unique(map(str, fgraph.variables)):
         raise ValueError("Not all variables have unique names."
