@@ -1,4 +1,5 @@
 import theano
+from util import merge
 
 ## {{{ http://code.activestate.com/recipes/578231/ (r1)
 def memodict(f):
@@ -41,23 +42,64 @@ def fgraph_with_names(fgraph):
 def clone(x):
     return x.clone()
 
+def dag_unpack_singleton_tuples(dag):
+    """
+
+    merges two operations that look like this
+    {(out,) : {'fn': op,  'args': args}
+     out    : {'fn': index, 'args': (out, 0)}}
+    into just one that looks like this
+    {out    : {'fn': op,  'args': args}}
+    i.e. it unpacks singleton tuples
+    """
+
+    # dict of shortcuts
+    quick_outs = {out: dag[(out,)] for out in dag if (out,) in dag}
+
+    def badkey(out):
+        return (out in quick_outs
+             or (    isinstance(out, tuple)
+                 and len(out) == 1
+                 and out[0] in quick_outs))
+    clean_dag =  {out : dag[out] for out in dag
+                                 if not badkey(out)}
+
+    return merge(clean_dag, quick_outs)
+
+index = 'index'
 def fgraph_to_dag(fgraph):
     fgraph = fgraph_with_names(fgraph)
-
-    # Make unconnected copies of variables
     newvars = {var: clone(var) for var in fgraph.variables}
 
-    dag = {newvars[var]:
-                   {'fn'  : var.owner.op,
-                    'args': tuple(map(newvars.__getitem__, var.owner.inputs))}
-                    if var.owner else
-                   {'fn': None, 'args': ()}
-            for var in fgraph.variables}
+    # Produces dag with inputs and outputs as tuples
+    dag = {tuple(map(newvars.__getitem__, node.outputs)):
+            {'fn'  : node.op,
+             'args': tuple(map(newvars.__getitem__, node.inputs))}
+             for node in fgraph.nodes}
+    # lots of things like {'a' : {'fn': 'index', (('a', 'b'), 0)}}
+    # indexing into the tuples
+    gets = {out:
+            {'fn' : index,
+             'args' : (outs, i)}
+            for outs in dag if isinstance(outs, tuple)
+            for i, out in enumerate(outs)}
+
+    full_dag = merge(dag, gets)
+
+    # Lets clear away the trivial tuple indexing (indexing by 0)
+    clean_dag = dag_unpack_singleton_tuples(full_dag)
+
+    # don't forget that we need to include inputs
+    input_dag = {newvars[inp] : {'fn': None, 'args': ()}
+            for inp in fgraph.inputs}
+
+    final_dag = merge(clean_dag, input_dag)
 
     inputs  = tuple(map(newvars.__getitem__, fgraph.inputs))
     outputs = tuple(map(newvars.__getitem__, fgraph.outputs))
 
-    return dag, inputs, outputs
+    return final_dag, inputs, outputs
+
 
 def dag_to_fgraph(dag, inputs, outputs):
     input_set = {}

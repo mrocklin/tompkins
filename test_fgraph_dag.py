@@ -7,6 +7,15 @@ def info(var):
 def namify_dict(d):
     return {k.name: v for k,v in d.items()}
 
+def test_dag_unpack_singleton_tuples():
+    indag = {'a':   {'fn': get, 'args':(('a',), 0)},
+            ('a',): {'fn': 'stuff', 'args': (1,2,3)},
+             'b':   {'fn': None, 'args': ()}}
+
+    assert dag_unpack_singleton_tuples(indag) == {
+        'a': {'fn': 'stuff', 'args': (1,2,3)},
+        'b':   {'fn': None, 'args': ()}}
+
 def test_simple_add():
     x = theano.tensor.matrix('x')
     y = theano.tensor.matrix('y')
