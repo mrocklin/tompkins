@@ -42,12 +42,40 @@ def fgraph_with_names(fgraph):
 def clone(x):
     return x.clone()
 
-def dag_unpack_singleton_tuples(dag):
+
+index = '_index'
+
+def fgraph_to_tuple_dag(fgraph):
+    fgraph = fgraph_with_names(fgraph)
+    newvars = {var: clone(var) for var in fgraph.variables}
+
+    # Produces dag with inputs and outputs as tuples
+    dag = {tuple(map(newvars.__getitem__, node.outputs)):
+            {'fn'  : node.op,
+             'args': tuple(map(newvars.__getitem__, node.inputs))}
+             for node in fgraph.nodes}
+
+    inputs  = tuple(map(newvars.__getitem__, fgraph.inputs))
+    outputs = tuple(map(newvars.__getitem__, fgraph.outputs))
+
+    return dag, inputs, outputs
+
+def tuple_dag_to_index_dag(tdag):
+
+    gets = {out:
+            {'fn' : index,
+             'args' : (outs, i)}
+            for outs in tdag if isinstance(outs, tuple)
+            for i, out in enumerate(outs)}
+
+    return merge(tdag, gets)
+
+def remove_singleton_indices(dag):
     """
 
     merges two operations that look like this
     {(out,) : {'fn': op,  'args': args}
-     out    : {'fn': index, 'args': (out, 0)}}
+     out    : {'fn': index, 'args': ((out,) 0)}}
     into just one that looks like this
     {out    : {'fn': op,  'args': args}}
     i.e. it unpacks singleton tuples
@@ -66,54 +94,56 @@ def dag_unpack_singleton_tuples(dag):
 
     return merge(clean_dag, quick_outs)
 
-index = 'index'
-def fgraph_to_dag(fgraph):
-    fgraph = fgraph_with_names(fgraph)
-    newvars = {var: clone(var) for var in fgraph.variables}
+def insert_single_indices(dag):
+    """ Add in all index operations from tuples, even singletons
 
-    # Produces dag with inputs and outputs as tuples
-    dag = {tuple(map(newvars.__getitem__, node.outputs)):
-            {'fn'  : node.op,
-             'args': tuple(map(newvars.__getitem__, node.inputs))}
-             for node in fgraph.nodes}
-    # lots of things like {'a' : {'fn': 'index', (('a', 'b'), 0)}}
-    # indexing into the tuples
-    gets = {out:
-            {'fn' : index,
-             'args' : (outs, i)}
-            for outs in dag if isinstance(outs, tuple)
-            for i, out in enumerate(outs)}
+    Reverses remove_singleton_indices
+    """
 
-    full_dag = merge(dag, gets)
+    return merge(*[
+            {out: dag[out]}
+            if isinstance(out, tuple) else
+            {(out,) : dag[out],
+              out   : {'fn': index, 'args':((out,), 0)}}
+            for out in dag])
 
-    # Lets clear away the trivial tuple indexing (indexing by 0)
-    clean_dag = dag_unpack_singleton_tuples(full_dag)
+def remove_index_entries(dag):
+    """ Remove naked variables - only tuples as outputs """
+    return {k:v for k,v in dag.items() if isinstance(k, tuple)}
 
-    # don't forget that we need to include inputs
-    input_dag = {newvars[inp] : {'fn': None, 'args': ()}
-            for inp in fgraph.inputs}
-
-    final_dag = merge(clean_dag, input_dag)
-
-    inputs  = tuple(map(newvars.__getitem__, fgraph.inputs))
-    outputs = tuple(map(newvars.__getitem__, fgraph.outputs))
-
-    return final_dag, inputs, outputs
-
-
-def dag_to_fgraph(dag, inputs, outputs):
+def tuple_dag_to_fgraph(dag, inputs, outputs):
     input_set = {}
+
+    def is_input(var):
+        return var in inputs
+    subvar = {out:outs for outs in dag for out in outs}
 
     @memodict
     def _build_var(var):
-        if not dag[var]['fn']:
+        if is_input(var):
             newvar = clone(var)
-            input_set[var.name] = newvar
+            input_set[str(var)] = newvar
             return newvar
-        return dag[var]['fn'].make_node(
-                *map(_build_var, dag[var]['args'])).outputs[0]
+        # In which tuple do I live?
+        outs = subvar[var]
+        idx  = outs.index(var)
+        fn   = dag[outs]['fn']
+        args = dag[outs]['args']
+        # Compute result of the associated function
+        # Get the variables for the inputs recursively
+        return fn.make_node(*map(_build_var, args)).outputs[idx]
 
     fgraph_outputs = map(_build_var, outputs)
     fgraph_inputs  = map(input_set.__getitem__, map(str, inputs))
 
     return theano.FunctionGraph(fgraph_inputs, fgraph_outputs)
+
+# Composite functions
+def fgraph_to_dag(fgraph):
+    tdag, inputs, outputs = fgraph_to_tuple_dag(fgraph)
+    dag = remove_singleton_indices(tuple_dag_to_index_dag(tdag))
+    return dag, inputs, outputs
+
+def dag_to_fgraph(dag, inputs, outputs):
+    tdag = remove_index_entries(insert_single_indices(dag))
+    return tuple_dag_to_fgraph(tdag, inputs, outputs)

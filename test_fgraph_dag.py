@@ -7,24 +7,23 @@ def info(var):
 def namify_dict(d):
     return {k.name: v for k,v in d.items()}
 
-def test_dag_unpack_singleton_tuples():
-    indag = {'a':   {'fn': get, 'args':(('a',), 0)},
+def test_remove_singleton_indices():
+    indag = {'a':   {'fn': index, 'args':(('a',), 0)},
             ('a',): {'fn': 'stuff', 'args': (1,2,3)},
              'b':   {'fn': None, 'args': ()}}
 
-    assert dag_unpack_singleton_tuples(indag) == {
+    assert remove_singleton_indices(indag) == {
         'a': {'fn': 'stuff', 'args': (1,2,3)},
         'b':   {'fn': None, 'args': ()}}
 
-def test_simple_add():
+
+def simple_example():
     x = theano.tensor.matrix('x')
     y = theano.tensor.matrix('y')
     z = x + y
-    fgraph = theano.FunctionGraph((x,y), (z,))
-    _test_fgraph_dag_equivalence(fgraph)
-    _test_roundtrip(fgraph)
+    return (x, y), (z,)
 
-def test_complex():
+def complex_example():
     x = theano.tensor.matrix('x')
     y = theano.tensor.matrix('y')
     z = theano.tensor.matrix('z')
@@ -33,25 +32,36 @@ def test_complex():
     c = a + a + b
     d = x[:2] + y + c
 
-    fgraph = theano.FunctionGraph((x,y, z), (d, c, x))
-    _test_fgraph_dag_equivalence(fgraph)
-    _test_roundtrip(fgraph)
+    return (x, y, z), (d, c, x)
 
 def _test_fgraph_dag_equivalence(fgraph):
     fgraph = fgraph_with_names(fgraph)
     dag, inputs, outputs = fgraph_to_dag(fgraph)
-    assert set(map(info, fgraph.variables)) == set(map(info, dag.keys()))
+    assert set(map(info, fgraph.variables)) == set(map(info, tuple(dag.keys())+inputs))
 
     dag = namify_dict(dag)
     assert all(type(dag[var.name]['fn']) == type(var.owner.op
                                                  if var.owner else None)
-               for var in fgraph.variables)
+               for var in fgraph.variables
+               if var.name not in map(str, inputs))
     assert all(map(info, dag[var.name]['args']) == map(info,
                                                        var.owner.inputs
                                                        if var.owner else ())
-               for var in fgraph.variables)
+               for var in fgraph.variables
+               if var.name not in map(str, inputs))
 
 def _test_roundtrip(fgraph):
     fgraph2 = dag_to_fgraph(*fgraph_to_dag(fgraph))
     assert (theano.printing.debugprint(fgraph,  file='str') ==
             theano.printing.debugprint(fgraph2, file='str'))
+
+def _test_example(example):
+    inputs, outputs = example()
+    fgraph = theano.FunctionGraph(inputs, outputs)
+    _test_fgraph_dag_equivalence(fgraph)
+    _test_roundtrip(fgraph)
+
+def test_simple():
+    _test_example(simple_example)
+def test_complex():
+    _test_example(complex_example)
