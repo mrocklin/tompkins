@@ -102,7 +102,7 @@ def insert_single_indices(dag):
 
     return merge(*[
             {out: dag[out]}
-            if isinstance(out, tuple) else
+            if isinstance(out, tuple) or dag[out]['fn'] == index else
             {(out,) : dag[out],
               out   : {'fn': index, 'args':((out,), 0)}}
             for out in dag])
