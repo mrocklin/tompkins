@@ -66,7 +66,7 @@ def insert_single_indices(dag):
 
 def remove_index_entries(dag):
     """ Remove naked variables - only tuples as outputs """
-    return {k:v for k,v in dag.items() if isinstance(k, tuple)}
+    return {k:v for k,v in dag.items() if v['fn'] != index}
 
 
 def tuple_dag_to_graph(dag, inputs, outputs, ith_output):
