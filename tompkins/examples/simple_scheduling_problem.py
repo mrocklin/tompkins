@@ -1,4 +1,4 @@
-from tompkins import schedule, jobs_when_where
+from tompkins.ilp import schedule, jobs_when_where
 from collections import defaultdict
 from pulp import value
 """

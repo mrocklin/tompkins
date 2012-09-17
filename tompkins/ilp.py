@@ -15,10 +15,10 @@ Mark F. Tompkins, June 2003, Masters thesis for MIT Dept EECS[3]
 [3] http://dspace.mit.edu/bitstream/handle/1721.1/16974/53816027.pdf?sequence=1
 """
 
-from pulp import LpVariable, LpProblem, LpMinimize, LpInteger, LpContinuous, lpSum
+from pulp import (LpVariable, LpProblem, LpMinimize, LpInteger, LpContinuous,
+        lpSum)
 from collections import defaultdict
-from util import reverse_dict, dictify
-from util import merge, intersection
+from tompkins.util import reverse_dict, dictify, merge, intersection
 
 def schedule(Jobs, Agents, D, C, R, B, P, M):
     """

@@ -1,13 +1,15 @@
 # a -> 1 -> b -> 2 -> d
 #        -> c -> 3 -> e
 
-from bidag import bidag_to_unidag, send, recv
+from tompkins.dag_schedule import send, recv
+
 a,b,c,d,e = 'abcde'
 A,B,C = 'ABC'
 usedby = {a: (1,), b: (2,), c: (3,), d:(), e:()}
 outputsof = {1: (b, c), 2: (d,), 3: (e, )}
 
-unidag = bidag_to_unidag(usedby, outputsof)
+# unidag = bidag_to_unidag(usedby, outputsof)
+unidag = {1: (2, 3), 2: (), 3: ()}
 agents = (A, B, C)
 
 def computation_cost(job, agent):
@@ -42,10 +44,11 @@ solution = {
              'C': {3: (), ('recv', 'A', 'C', 1, 3): (3,)}},
         'makespan': 1,
         'sched': [(1, 0.0, 'A'), (2, 1.0, 'B'), (3, 1.0, 'C')],
-        'bidags':
-            {'A': ({a: (1,), b: (send('A', 'B'), ), c: (send('A', 'C'),)},
-                   {1: (b, c), send('A', 'B'): (), send('A', 'C'): ()}),
-             'B': ({b: (2,), d: ()},
-                 {recv('A', 'B'): (b,), 2: (d,)}),
-             'C': ({c: (3,), e: ()},
-                 {recv('A', 'C'): (c,), 3: (e,)})}}
+#        'bidags':
+#            {'A': ({a: (1,), b: (send('A', 'B'), ), c: (send('A', 'C'),)},
+#                   {1: (b, c), send('A', 'B'): (), send('A', 'C'): ()}),
+#             'B': ({b: (2,), d: ()},
+#                 {recv('A', 'B'): (b,), 2: (d,)}),
+#             'C': ({c: (3,), e: ()},
+#                 {recv('A', 'C'): (c,), 3: (e,)})}
+            }

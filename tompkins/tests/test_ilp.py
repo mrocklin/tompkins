@@ -1,8 +1,8 @@
-from tompkins import schedule, PtoQ, jobs_when_where
+from tompkins.ilp import schedule, PtoQ, jobs_when_where
 from collections import defaultdict
+from tompkins.examples.simple_scheduling_problem import Jobs, Agents, D, C, R, B, P, M
 
 def test_schedule():
-    from simple_scheduling_problem import Jobs, Agents, D, C, R, B, P, M
     prob, X, S, Cmax = schedule(Jobs, Agents, D, C, R, B, P, M)
     prob.solve()
     assert Cmax.value() == 14
@@ -17,7 +17,6 @@ def test_PtoQ():
     assert Q['a','b'] and Q['b', 'c'] and Q['a', 'c']
 
 def test_jobs_when_where():
-    from simple_scheduling_problem import Jobs, Agents, D, C, R, B, P, M
     prob, X, S, Cmax = schedule(Jobs, Agents, D, C, R, B, P, M)
     result = jobs_when_where(prob, X, S, Cmax)
     assert isinstance(result, list)

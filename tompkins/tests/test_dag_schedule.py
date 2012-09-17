@@ -1,4 +1,6 @@
-from dag_schedule import manydags, unidag_to_P, send, recv, schedule
+from tompkins.dag_schedule import manydags, unidag_to_P, send, recv, schedule
+from tompkins.examples.simple_split_problem import (unidag, agents,
+        computation_cost, communication_cost, R, B, M, solution)
 
 def test_jobs_where():
     pass
@@ -34,12 +36,9 @@ def test_manydags_less_simple():
     assert dags['C'] == {recv('A', 'C', 1, 3): (3, ), 3: ()}
 
 def test_simple_split_problem_integrative():
-    from simple_split_problem import (unidag, agents, computation_cost,
-            communication_cost, R, B, M)
     dags, sched, makespan = schedule(unidag, agents, computation_cost,
                                      communication_cost, R, B, M)
 
-    from simple_split_problem import solution
     assert dags == solution['dags']
 
     assert sched == solution['sched']

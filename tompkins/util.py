@@ -5,6 +5,7 @@ def iterable(x):
         return True
     except TypeError:
         return False
+
 class fakedict(object):
     def __init__(self, fn):
         self.fn = fn

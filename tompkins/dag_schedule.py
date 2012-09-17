@@ -1,6 +1,6 @@
 from tompkins import schedule as schedule_tompkins
 from tompkins import jobs_when_where
-from util import reverse_dict, dictify, intersection, merge
+from tompkins.util import reverse_dict, dictify, intersection, merge
 from collections import defaultdict
 
 
