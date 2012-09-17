@@ -1,2 +1,5 @@
-from ilp import schedule, PtoQ, jobs_when_where
+import ilp
+import dag
 import examples
+from dag import schedule
+

@@ -1,4 +1,4 @@
-from tompkins.dag_schedule import manydags, unidag_to_P, send, recv, schedule
+from tompkins.dag import manydags, unidag_to_P, send, recv, schedule
 from tompkins.examples.simple_split_problem import (unidag, agents,
         computation_cost, communication_cost, R, B, M, solution)
 

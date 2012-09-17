@@ -1,11 +1,11 @@
-from tompkins import schedule as schedule_tompkins
-from tompkins import jobs_when_where
+from tompkins.ilp import schedule as schedule_tompkins
+from tompkins.ilp import jobs_when_where
 from tompkins.util import reverse_dict, dictify, intersection, merge
 from collections import defaultdict
 
 
 def transform_args(dag, agents, compcost, commcost, R, B, M):
-    """ Transform arguments given to dag_schedule to those expected by tompkins
+    """ Transform arguments given to dag.schedule to those expected by tompkins
 
     inputs:
         dag - unipartite dag of the form {1: (2, 3)} if job 1 precedes 2 and 3
@@ -29,20 +29,20 @@ def transform_args(dag, agents, compcost, commcost, R, B, M):
 def schedule(dag, agents, compcost, commcost, R, B, M):
     """ Statically Schedule a DAG of jobs on a set of machines
 
-    This function wraps tompkins.schedule
+    This function wraps tompkins.ilp.schedule
 
     inputs:
         dag - unipartite dag of the form {1: (2, 3)} if job 1 precedes 2 and 3
         agents - a list of machines on which we can run each job
         compcost - a function (job, agent) -> runtime
         commcost - a function (job, agent, agent) -> communication time
-        R - a function (job) -> start time (usually lambda j: 0)
+        R - a function (job) -> start time (usually lambda job: 0)
         B - a function (job, agent) -> 1/0 - 1 if job can be run on agent
         M - a maximum makespan
 
     outputs:
-        dags - a dict mapping machine to local dag
-        sched - a list of (job, start_time, machine)
+        dags     - a dict mapping machine to local dag
+        sched    - a list of (job, start_time, machine)
         makespan - the total runtime of the computation
     """
     args = schedule_tompkins(

@@ -1,7 +1,7 @@
 # a -> 1 -> b -> 2 -> d
 #        -> c -> 3 -> e
 
-from tompkins.dag_schedule import send, recv
+from tompkins.dag import send, recv
 
 a,b,c,d,e = 'abcde'
 A,B,C = 'ABC'
