@@ -9,8 +9,9 @@ def iterable(x):
 class fakedict(object):
     def __init__(self, fn):
         self.fn = fn
+        self.multi_input = fn.func_code.co_argcount > 1
     def __getitem__(self, item):
-        if iterable(item):
+        if self.multi_input:
             return self.fn(*item)
         else:
             return self.fn(item)
