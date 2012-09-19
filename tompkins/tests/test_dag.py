@@ -1,4 +1,5 @@
-from tompkins.dag import manydags, unidag_to_P, send, recv, schedule
+from tompkins.dag import (manydags, unidag_to_P, send, recv, schedule, issend,
+        isrecv, replace_send_recv)
 from tompkins.examples.simple_split_problem import (unidag, agents,
         computation_cost, communication_cost, R, B, M, solution)
 
@@ -44,3 +45,16 @@ def test_simple_split_problem_integrative():
     assert sched == solution['sched']
 
     assert makespan == solution['makespan']
+
+def test_issend():
+    assert issend(send(1,2,3,4))
+    assert not issend(recv(1,2,3,4))
+def test_isrecv():
+    assert isrecv(recv(1,2,3,4))
+    assert not isrecv(send(1,2,3,4))
+
+def test_replace_send_recv():
+    dag = {1: (2, send(1,2,3,4)), 2: (), send(1,2,3,4): (), recv(1,2,3,4): (1,)}
+    o = replace_send_recv(dag, lambda a,b,c,d: a+b+c+d, lambda a,b,c,d: a*b*c*d)
+
+    assert o == {1: (2, 1+2+3+4), 2: (), 1+2+3+4: (), 1*2*3*4: (1,)}

@@ -79,6 +79,25 @@ def send(from_machine, to_machine, from_job, to_job):
 def recv(from_machine, to_machine, from_job, to_job):
     return ("recv", from_machine, to_machine, from_job, to_job)
 
+def issend(x):
+    return isinstance(x, tuple) and x[0] == "send"
+def isrecv(x):
+    return isinstance(x, tuple) and x[0] == "recv"
+
+def replace_send_recv(dag, fn_send, fn_recv):
+    """ Replaces all instances of tompkins send with a user defined send
+
+    inputs functions like:
+        fn_send - (from_machine, to_machine, from_job, to_job) -> a send
+        fn_recv - (from_machine, to_machine, from_job, to_job) -> a recv
+    """
+    def convert(x):
+        if issend(x): return fn_send(*x[1:])
+        if isrecv(x): return fn_recv(*x[1:])
+        return x
+    return {convert(key): tuple(map(convert, values))
+                            for key, values in dag.items()}
+
 def manydags(dag, jobson):
     """ Given a dag and a schedule return many dags with sends/receives
 
