@@ -45,3 +45,7 @@ def merge(*args):
 
 def intersection(t1, t2):
     return tuple(set(t1).intersection(set(t2)))
+
+def unique(coll):
+    return len(coll) == len(set(coll))
+
