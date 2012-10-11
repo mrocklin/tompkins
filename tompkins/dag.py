@@ -1,6 +1,6 @@
 from tompkins.ilp import schedule as schedule_tompkins
 from tompkins.ilp import jobs_when_where
-from tompkins.util import reverse_dict, dictify, intersection, merge
+from tompkins.util import reverse_dict, dictify, intersection, merge, unique
 from collections import defaultdict
 
 
@@ -111,9 +111,12 @@ def manydags(dag, jobson):
         Each dag is represented like dag (see above)
         New send and receive jobs have been added
     """
+
     onmachine = {value:key  for key, values in jobson.items()
                             for value in values}
     revdag = reverse_dict(dag)
+    assert unique(sum(jobson.values(), ()))
+
     return {machine:
              merge(
                # Standard local dag
