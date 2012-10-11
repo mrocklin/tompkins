@@ -36,6 +36,35 @@ def test_manydags_less_simple():
     assert dags['B'] == {recv('A', 'B', 1, 2): (2, ), 2: ()}
     assert dags['C'] == {recv('A', 'C', 1, 3): (3, ), 3: ()}
 
+def test_manydags_multivar():
+    # 1 -> 2 -> 6
+    #   -> 3 ->
+    #   -> 4 ->
+    #   -> 5 ->
+    dag = {1: (2, 3, 4, 5), 2: (6,), 3: (6,), 4: (6,), 5: (6,), 6: ()}
+    jobson = {'A': (1, 2, 6), 'B': (3, ), 'C':(4,), 'D': (5,)}
+    dags = manydags(dag, jobson)
+    assert dags == {'A': {1: (2, ('send', 'A', 'B', 1, 3),
+                                 ('send', 'A', 'C', 1, 4),
+                                 ('send', 'A', 'D', 1, 5)),
+                          2: (6,),
+                          6: (),
+                          ('recv', 'B', 'A', 3, 6): (6,),
+                          ('recv', 'C', 'A', 4, 6): (6,),
+                          ('recv', 'D', 'A', 5, 6): (6,),
+                          ('send', 'A', 'B', 1, 3): (),
+                          ('send', 'A', 'C', 1, 4): (),
+                          ('send', 'A', 'D', 1, 5): ()},
+                    'B': {3: (('send', 'B', 'A', 3, 6),),
+                          ('recv', 'A', 'B', 1, 3): (3,),
+                          ('send', 'B', 'A', 3, 6): ()},
+                    'C': {4: (('send', 'C', 'A', 4, 6),),
+                          ('recv', 'A', 'C', 1, 4): (4,),
+                          ('send', 'C', 'A', 4, 6): ()},
+                    'D': {5: (('send', 'D', 'A', 5, 6),),
+                          ('recv', 'A', 'D', 1, 5): (5,),
+                          ('send', 'D', 'A', 5, 6): ()}}
+
 def test_simple_split_problem_integrative():
     dags, sched, makespan = schedule(unidag, agents, computation_cost,
                                      communication_cost, R, B, M)
