@@ -4,6 +4,9 @@ from tompkins.util import reverse_dict, dictify, intersection, merge, unique
 from collections import defaultdict
 
 
+def precedes_to_dag(jobs, precedes):
+    return {a: [b for b in jobs if precedes(a, b)] for a in jobs}
+
 def transform_args(dag, agents, compcost, commcost, R, B, M):
     """ Transform arguments given to dag.schedule to those expected by tompkins
 
@@ -98,7 +101,7 @@ def replace_send_recv(dag, fn_send, fn_recv):
     return {convert(key): tuple(map(convert, values))
                             for key, values in dag.items()}
 
-def manydags(dag, jobson):
+def manydags(dag, jobson, send=send, recv=recv):
     """ Given a dag and a schedule return many dags with sends/receives
 
     inputs:

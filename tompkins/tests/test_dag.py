@@ -22,6 +22,26 @@ def test_manydags_simple():
                          send('A', 'B', 2, 3): ()}
     assert dags['B'] == {recv('A', 'B', 2, 3): (3, ), 3:()}
 
+def test_manydags_send_recv():
+    # 1 -> 2 -> 3
+    dag = {1: (2,), 2: (3, ), 3:()}
+    jobson = {'A': (1, 2), 'B': (3, )}
+
+    class Send(object):
+        def __init__(self, *args):
+            self.args = args
+        def __eq__(self, other):
+            return type(self) == type(other) and self.args == other.args
+        def __hash__(self):
+            return hash((type(self), self.args))
+    class Recv(Send): pass
+
+    dags = manydags(dag, jobson, send=Send, recv=Recv)
+    assert dags['A'] == {1: (2, ),
+                         2: (Send('A', 'B', 2, 3), ),
+                         Send('A', 'B', 2, 3): ()}
+    assert dags['B'] == {Recv('A', 'B', 2, 3): (3, ), 3:()}
+
 def test_manydags_less_simple():
     # 1 -> 2
     #   -> 3
