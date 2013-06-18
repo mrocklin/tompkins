@@ -175,7 +175,7 @@ def jobs_when_where(prob, X, S, Cmax):
     prob.solve()
 
     def runs_on(job, X):
-        return [k for k,v in X[job].items() if v.value()==1][0]
+        return [k for k,v in X[job].items() if v.value()][0]
 
     sched = [(job, time.value(), runs_on(job,X)) for job, time in S.items()]
     return list(sorted(sched, key=lambda x:x[1:]))
