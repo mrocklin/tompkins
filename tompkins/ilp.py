@@ -16,7 +16,7 @@ Mark F. Tompkins, June 2003, Masters thesis for MIT Dept EECS[3]
 """
 
 from pulp import (LpVariable, LpProblem, LpMinimize, LpInteger, LpContinuous,
-        lpSum)
+        lpSum, LpStatus)
 from collections import defaultdict
 from tompkins.util import reverse_dict, dictify, merge, intersection
 
@@ -172,7 +172,9 @@ def jobs_when_where(prob, X, S, Cmax):
 
     >>> sched = jobs_when_where(*make_ilp(env, ... ))
     """
-    prob.solve()
+    status = LpStatus[prob.solve()]
+    if status != 'Optimal':
+        print "ILP solver status: ", status
 
     def runs_on(job, X):
         return [k for k,v in X[job].items() if v.value()][0]
