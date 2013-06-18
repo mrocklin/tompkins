@@ -8,5 +8,4 @@ See also:
 import ilp
 import dag
 import examples
-from dag import schedule
-
+from dag import schedule, orderings
