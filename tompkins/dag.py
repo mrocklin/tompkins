@@ -1,6 +1,7 @@
 from tompkins.ilp import schedule as schedule_tompkins
 from tompkins.ilp import jobs_when_where
-from tompkins.util import reverse_dict, dictify, intersection, merge, unique
+from tompkins.util import (reverse_dict, dictify, intersection, merge, unique,
+        groupby)
 from collections import defaultdict
 
 
@@ -148,3 +149,9 @@ def manydags(dag, jobson, send=send, recv=recv):
                    }
              )
              for machine in jobson.keys()}
+
+
+def orderings(sched):
+    nth = lambda n: (lambda x: x[n])
+    byagent = groupby(nth(2), sched)
+    return {k: map(nth(0), sorted(v, key=nth(1))) for k,v in byagent.items()}

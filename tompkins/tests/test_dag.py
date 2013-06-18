@@ -1,5 +1,5 @@
 from tompkins.dag import (manydags, unidag_to_P, send, recv, schedule, issend,
-        isrecv, replace_send_recv)
+        isrecv, replace_send_recv, orderings)
 from tompkins.examples.simple_split_problem import (unidag, agents,
         computation_cost, communication_cost, R, B, M, solution)
 
@@ -88,10 +88,13 @@ def test_manydags_multivar():
 def test_simple_split_problem_integrative():
     dags, sched, makespan = schedule(unidag, agents, computation_cost,
                                      communication_cost, R, B, M)
+    orders = orderings(sched)
 
     assert dags == solution['dags']
 
     assert sched == solution['sched']
+
+    assert orders == solution['orders']
 
     assert makespan == solution['makespan']
 
