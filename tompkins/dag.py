@@ -32,7 +32,7 @@ def transform_args(dag, agents, compcost, commcost, R, B, M):
 def schedule(dag, agents, compcost, commcost,
             R=lambda job: 0,        # Data available immediately
             B=lambda job, agent: 1, # All agents can run all jobs
-            M=1e9,                  # Large cutoff
+            M=100000.0,             # Large cutoff
             **kwargs):
     """ Statically Schedule a DAG of jobs on a set of machines
 
