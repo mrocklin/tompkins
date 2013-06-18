@@ -29,7 +29,10 @@ def transform_args(dag, agents, compcost, commcost, R, B, M):
     jobs = dag.keys()
     return jobs, agents, D, C, R, B, P, M
 
-def schedule(dag, agents, compcost, commcost, R, B, M):
+def schedule(dag, agents, compcost, commcost,
+            R=lambda job: 0,        # Data available immediately
+            B=lambda job, agent: 1, # All agents can run all jobs
+            M=1e9):                 # Large cutoff
     """ Statically Schedule a DAG of jobs on a set of machines
 
     This function wraps tompkins.ilp.schedule
